@@ -1,0 +1,22 @@
+{
+  "name": "g2n-db",
+  "version": "0.0.1",
+  "packageManager": "yarn@3.6.1",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.26.0",
+    "axios": "^1.4.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.3.1",
+    "lodash": "^4.17.21"
+  },
+  "scripts": {
+    "start": "node --trace-warnings ./src/index.js",
+    "dry": "cross-env DRY_RUN=true node --no-warnings ./src/index.js",
+    "games": "cross-env MANAGER=games node --trace-warnings ./src/index.js",
+    "genres": "cross-env MANAGER=genres node --trace-warnings ./src/index.js",
+    "companies": "cross-env MANAGER=companies node --trace-warnings ./src/index.js"
+  },
+  "devDependencies": {}
+}
