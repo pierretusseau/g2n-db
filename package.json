@@ -9,6 +9,7 @@
     "axios": "^1.4.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
+    "igdb-api-node": "^5.0.2",
     "lodash": "^4.17.21"
   },
   "scripts": {
