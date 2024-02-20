@@ -1,5 +1,5 @@
 import { ManageGames } from "./Games/Manager.js"
-import { ManageGenres } from "./Genres/Manager.js"
+// import { ManageGenres } from "./Genres/Manager.js"
 import { ManageCompanies } from "./Companies/Manager.js"
 
 import { errorHandler } from "./utils/Utils.js"
@@ -18,14 +18,14 @@ async function runManagerAsync(managerFn, name) {
 
 if (manager === "games") {
   runManagerAsync(ManageGames, "games")
-} else if (manager === "genres") {
-  runManagerAsync(ManageGenres, "genres")
+  // } else if (manager === "genres") {
+  //   runManagerAsync(ManageGenres, "genres")
 } else if (manager === "companies") {
   runManagerAsync(ManageCompanies, "companies")
 } else {
   const managers = [
     { fn: ManageGames, name: "games" },
-    { fn: ManageGenres, name: "genres" },
+    // { fn: ManageGenres, name: "genres" },
     { fn: ManageCompanies, name: "companies" },
   ]
 
