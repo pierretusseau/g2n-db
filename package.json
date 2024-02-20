@@ -17,7 +17,9 @@
     "dry": "cross-env DRY_RUN=true node --no-warnings ./src/index.js",
     "games": "cross-env MANAGER=games node --trace-warnings ./src/index.js",
     "genres": "cross-env MANAGER=genres node --trace-warnings ./src/index.js",
-    "companies": "cross-env MANAGER=companies node --trace-warnings ./src/index.js"
+    "companies": "cross-env MANAGER=companies node --trace-warnings ./src/index.js",
+    "ag": "cross-env MANAGER=app_games node --trace-warnings ./src/index.js",
+    "test": "node src/tests/CompareGamesAndAppGames.js"
   },
   "devDependencies": {}
 }

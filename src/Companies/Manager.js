@@ -7,7 +7,7 @@ import {
 } from "./WrapperSupabase.js"
 
 export async function ManageCompanies(dryRun = false) {
-  // Fetch data from Fandom
+  // Fetch data from IGDB
   const companiesFromIGDB = await getCompaniesFromIGDB()
   // console.log(companiesFromIGDB)
 

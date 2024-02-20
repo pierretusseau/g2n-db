@@ -3,8 +3,6 @@ import { baseUrl, baseAPI, concatenateCompanies, drawLoadingBar, consoleLine, lo
 import IGDBClient from "../Common/IGDBClient.js"
 import { GetGamesFromSupabase } from "../Games/WrapperSupabase.js"
 
-const estimatedNumberOfPages = 363
-
 async function getInvolvedCompaniesList(companies, offset) {
   try {
     const response = await IGDBClient.fields(["checksum", "company", "developer", "publisher"])
@@ -26,8 +24,7 @@ async function getCompaniesList(gameIds, offset) {
     const response = await IGDBClient.fields(["checksum", "name", "websites", "developed", "published", "description", "country"])
       .limit(500)
       .offset(offset)
-      .where(`developed = (${gameIds.join(",")})`)
-      .where(`published = (${gameIds.join(",")})`)
+      .where(`developed = (${gameIds.join(",")}) | published = (${gameIds.join(",")})`)
       .request("/companies")
 
     return response.data
@@ -79,9 +76,7 @@ async function getAllInvolvedCompanies() {
 async function getAllCompanies() {
   try {
     const gamesFromSupabase = await GetGamesFromSupabase()
-    const companiesIDs = concatenateCompanies(gamesFromSupabase)
-    const numberofCompanies = companiesIDs.length
-    console.log(`\nRequesting companies from ${baseUrl}${baseAPI}/companies with ${numberofCompanies} to look for`)
+    console.log(`\n\n\x1b[36mRequesting companies from ${baseUrl}${baseAPI}/companies\x1b[0m`)
     let offset = 0
     let allCompanies = []
 

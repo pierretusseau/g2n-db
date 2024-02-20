@@ -2,7 +2,7 @@ import { getGamesFromIGDB } from "./WrapperIGDB.js"
 import { GetGamesFromSupabase, CreateGameToSupabase, UpdateGameToSupabase, DeleteGameToSupabase } from "./WrapperSupabase.js"
 
 export async function ManageGames(dryRun = false) {
-  // Fetch data from Fantom
+  // Fetch data from IGDB
   /*----------------------------------------------------*/
   const gamesFromIGDB = await getGamesFromIGDB()
   // console.log("gamesFromIGDB", gamesFromIGDB[0]["traits"])
