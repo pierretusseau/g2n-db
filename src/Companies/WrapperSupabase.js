@@ -23,11 +23,11 @@ export async function UpdateCompanyToSupabase(data) {
   return supabaseClient
     .from("companies")
     .update(data)
-    .match({ checksum: data.checksum })
+    .match({ id: data.id })
     .then(handleSupabaseError)
     .catch((err) => console.log(err))
 }
 
 export async function DeleteCompanyToSupabase(data) {
-  return supabaseClient.from("companies").delete().match({ name: data.name }).select().then(handleSupabaseError)
+  return supabaseClient.from("companies").delete().match({ id: data.id }).select().then(handleSupabaseError)
 }

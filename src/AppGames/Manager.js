@@ -1,3 +1,4 @@
+import { objectsComparator, formatDateForSB, consoleLine } from "../utils/Utils.js"
 import { GetGamesFromSupabase } from "../Games/WrapperSupabase.js"
 import { GetGenresFromSupabase } from "../Genres/WrapperSupabase.js"
 import { GetCompaniesFromSupabase } from "../Companies/WrapperSupabase.js"
@@ -8,110 +9,133 @@ import {
   DeleteAppGameToSupabase,
 } from "./WrapperSupabase.js"
 
+const getCuratedListOfGames = async (gamesFromSupabase) => {
+  try {
+    console.log(`\n\n\x1b[36mBuilding curated list of games\x1b[0m`)
+    // Fetch data from Supabase
+    /*----------------------------------------------------*/
+    const genresFromSupabase = await GetGenresFromSupabase()
+    const companiesFromSupabase = await GetCompaniesFromSupabase()
+    const gamesWithoutDeveloper = []
+    const gamesWithoutPublisher = []
+    const gamesWithoutDeveloperOrPublisher = []
+
+    const curatedGamesList = gamesFromSupabase.map((game, index, array) => {
+      // Year
+      const date = new Date(game.first_release_date * 1000)
+      const release_year = date.getFullYear()
+
+      // Genres
+      const genres = game.genres.map((ggenre) => {
+        return genresFromSupabase.find((genre) => genre.id === ggenre).name
+      })
+
+      // Developer
+      const developer = companiesFromSupabase
+        .filter((company) => company.developed)
+        .find((company) => {
+          return company.developed.some((c) => c === game.id)
+        })
+      if (!developer) {
+        gamesWithoutDeveloper.push({ id: game.id, name: game.name })
+      }
+
+      // Publisher
+      const publisher = companiesFromSupabase
+        .filter((company) => company.published)
+        .find((company) => {
+          return company.published.some((c) => c === game.id)
+        })
+      if (!publisher) {
+        gamesWithoutPublisher.push({ id: game.id, name: game.name })
+      }
+
+      if (!publisher && !developer) {
+        gamesWithoutDeveloperOrPublisher.push({ id: game.id, name: game.name })
+      }
+
+      return {
+        id: game.id,
+        checksum: game.checksum,
+        name: game.name,
+        release_year: release_year,
+        genres: genres,
+        developer: developer?.id || publisher?.id,
+        unsure_developer: !developer,
+        publisher: publisher?.id || developer?.id,
+        unsure_publisher: !publisher,
+        rating: game.rating,
+        rating_count: game.rating_count,
+        category: game.category,
+      }
+    })
+
+    console.log(
+      "\x1b[34mGames without developer :\x1b[0m",
+      `${gamesWithoutDeveloper.length}/${gamesFromSupabase.length}`,
+      gamesWithoutDeveloper
+    )
+    console.log(
+      "\x1b[34mGames without publisher :\x1b[0m",
+      `${gamesWithoutPublisher.length}/${gamesFromSupabase.length}`,
+      gamesWithoutPublisher
+    )
+    console.log(
+      "\x1b[34mGames without developer and publisher :\x1b[0m",
+      gamesWithoutDeveloperOrPublisher.length ? `${gamesWithoutDeveloperOrPublisher.length}/${gamesFromSupabase.length}` : "",
+      gamesWithoutDeveloperOrPublisher.length ? gamesWithoutDeveloperOrPublisher : "None"
+    )
+
+    console.log(`\n${curatedGamesList.length} \x1b[32mgames curated\x1b[0m`)
+
+    return curatedGamesList
+  } catch (error) {
+    console.log("Error while curating games list")
+    throw new Error(error)
+  }
+}
+
 export async function ManageAppGames(dryRun = false) {
-  console.log(`\n\n\x1b[36mBuilding AppGames\x1b[0m`)
-  // Fetch data from Supabase
-  /*----------------------------------------------------*/
-  const gamesFromSupabase = await GetGamesFromSupabase()
-  const genresFromSupabase = await GetGenresFromSupabase()
-  const companiesFromSupabase = await GetCompaniesFromSupabase()
-  const appGamesFromSupabase = await GetAppGamesFromSupabase()
-  const gamesWithoutDeveloper = []
-  const gamesWithoutPublisher = []
-  const gamesWithoutDeveloperOrPublisher = []
-
-  const curatedGamesList = gamesFromSupabase.map((game) => {
-    // Year
-    const date = new Date(game.first_release_date * 1000)
-    const release_year = date.getFullYear()
-
-    // Genres
-    const genres = game.genres.map((ggenre) => {
-      return genresFromSupabase.find((genre) => genre.id === ggenre).name
-    })
-
-    // Developer
-    const developer = companiesFromSupabase
-      .filter((company) => company.developed)
-      .find((company) => {
-        return company.developed.some((c) => c === game.id)
-      })
-    if (!developer) {
-      gamesWithoutDeveloper.push({ id: game.id, name: game.name })
-    }
-
-    // Publisher
-    const publisher = companiesFromSupabase
-      .filter((company) => company.published)
-      .find((company) => {
-        return company.published.some((c) => c === game.id)
-      })
-    if (!publisher) {
-      gamesWithoutPublisher.push({ id: game.id, name: game.name })
-    }
-
-    if (!publisher && !developer) {
-      gamesWithoutDeveloperOrPublisher.push({ id: game.id, name: game.name })
-    }
-
-    return {
-      id: game.id,
-      checksum: game.checksum,
-      name: game.name,
-      release_year: release_year,
-      genres: genres,
-      developer: developer?.checksum || publisher?.checksum,
-      unsure_developer: !developer,
-      publisher: publisher?.checksum || developer?.checksum,
-      unsure_publisher: !publisher,
-    }
-  })
-
-  console.log(
-    "\x1b[34mGames without developer :\x1b[0m",
-    `${gamesWithoutDeveloper.length}/${gamesFromSupabase.length}`,
-    gamesWithoutDeveloper
-  )
-  console.log(
-    "\x1b[34mGames without publisher :\x1b[0m",
-    `${gamesWithoutPublisher.length}/${gamesFromSupabase.length}`,
-    gamesWithoutPublisher
-  )
-  console.log(
-    "\x1b[34mGames without developer and publisher :\x1b[0m",
-    gamesWithoutDeveloperOrPublisher.length ? `${gamesWithoutPublisher.length}/${gamesFromSupabase.length}` : "",
-    gamesWithoutDeveloperOrPublisher.length ? gamesWithoutDeveloperOrPublisher : "None"
-  )
-
-  // console.log(`\n${curatedGamesList.length}/${gamesFromSupabase.length} \x1b[32mgames found\x1b[0m`)
-
-  if (!dryRun) {
-    let gameCounter = 0
-    // Update / Create
+  try {
+    // Fetch data from Supabase
     /*----------------------------------------------------*/
-    curatedGamesList.map((game) => {
-      const alreadyExists = appGamesFromSupabase.some((gameCompared) => {
-        return gameCompared.checksum === game.checksum
-      })
-      if (alreadyExists) {
-        UpdateAppGameToSupabase(game)
-      } else {
-        CreateAppGameToSupabase(game)
-      }
-      gameCounter++
-    })
+    const gamesFromSupabase = await GetGamesFromSupabase()
+    const appGamesFromSupabase = await GetAppGamesFromSupabase()
+    const curatedGamesList = await getCuratedListOfGames(gamesFromSupabase, appGamesFromSupabase)
 
-    // Delete
-    /*----------------------------------------------------*/
-    curatedGamesList.map((game) => {
-      const exists = appGamesFromSupabase.some((gameCompared) => {
-        return gameCompared.checksum === game.checksum
+    if (!dryRun) {
+      // Update / Create
+      /*----------------------------------------------------*/
+      console.log("should have", curatedGamesList.length, "of total games before send to DB wtf bro")
+      curatedGamesList.map((game) => {
+        const alreadyExists = appGamesFromSupabase.some((gameCompared) => {
+          return gameCompared.id === game.id
+        })
+        if (alreadyExists) {
+          const isIdentical = objectsComparator(
+            game,
+            appGamesFromSupabase.find((g) => g.id === game.id)
+          )
+          if (!isIdentical) UpdateAppGameToSupabase({ ...game, edited_at: formatDateForSB() })
+        } else {
+          CreateAppGameToSupabase(game)
+        }
       })
-      if (!exists) {
-        DeleteAppGameToSupabase(game)
-      }
-    })
 
-    console.log(`\n${gameCounter}/${gamesFromSupabase.length} \x1b[32mgames found\x1b[0m`)
+      // Delete
+      /*----------------------------------------------------*/
+      curatedGamesList.map((game) => {
+        const exists = appGamesFromSupabase.some((gameCompared) => {
+          return gameCompared.id === game.id
+        })
+        if (!exists) {
+          DeleteAppGameToSupabase(game)
+        }
+      })
+
+      console.log(`\n${curatedGamesList.length}/${gamesFromSupabase.length} \x1b[32mgames found\x1b[0m`)
+    }
+  } catch (error) {
+    throw new Error(error)
   }
 }

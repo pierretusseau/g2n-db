@@ -1,3 +1,4 @@
+import { objectsComparator, formatDateForSB } from "../utils/Utils.js"
 import { getGenresFromIGDB } from "./WrapperIGDB.js"
 import { GetGenresFromSupabase, CreateGenreToSupabase, UpdateGenreToSupabase, DeleteGenreToSupabase } from "./WrapperSupabase.js"
 
@@ -17,10 +18,17 @@ export async function ManageGenres(dryRun = false) {
     /*----------------------------------------------------*/
     genresFromIGDB.map((genre) => {
       const alreadyExists = genresFromSupabase.some((genreCompared) => {
-        return genreCompared.name === genre.name
+        return genreCompared.id === genre.id
       })
       if (alreadyExists) {
-        UpdateGenreToSupabase(genre)
+        const isIdentical = objectsComparator(
+          genre,
+          genresFromSupabase.find((g) => g.id === genre.id)
+        )
+        if (!isIdentical) {
+          UpdateGenreToSupabase({ ...genre, edited_at: formatDateForSB() })
+        }
+        // UpdateGenreToSupabase(genre)
       } else {
         CreateGenreToSupabase(genre)
       }
@@ -30,7 +38,7 @@ export async function ManageGenres(dryRun = false) {
     /*----------------------------------------------------*/
     genresFromSupabase.map((genre) => {
       const exists = genresFromIGDB.some((genreCompared) => {
-        return genreCompared.name === genre.name
+        return genreCompared.id === genre.id
       })
       if (!exists) {
         DeleteGenreToSupabase(genre)

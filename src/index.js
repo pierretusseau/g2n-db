@@ -8,6 +8,11 @@ import { errorHandler } from "./utils/Utils.js"
 const dryRun = process.env.DRY_RUN ?? false
 const manager = process.env.MANAGER ?? ""
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason)
+  // Handle the error, log it, or perform any necessary cleanup
+})
+
 async function runManagerAsync(managerFn, name) {
   try {
     await managerFn(dryRun)

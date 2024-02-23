@@ -23,7 +23,7 @@ export async function UpdateGenreToSupabase(data) {
   return supabaseClient
     .from("genres")
     .update(data)
-    .match({ checksum: data.checksum })
+    .match({ id: data.id })
     .then(handleSupabaseError)
     .catch((err) => console.log(err))
 }
@@ -32,7 +32,7 @@ export async function DeleteGenreToSupabase(data) {
   return supabaseClient
     .from("genres")
     .delete()
-    .match({ checksum: data.checksum })
+    .match({ id: data.id })
     .select()
     .then(handleSupabaseError)
     .catch((err) => console.log(err))

@@ -1,12 +1,36 @@
 import { baseUrl, baseAPI, log } from "../utils/Utils.js"
 import IGDBClient from "../Common/IGDBClient.js"
 
-// fields name,involved_companies,first_release_date,hypes,genres; limit 500; where first_release_date > 0 & hypes > 1 & involved_companies > 0;
+// main_game	0
+// dlc_addon	1
+// expansion	2
+// bundle	3
+// standalone_expansion	4
+// mod	5
+// episode	6
+// season	7
+// remake	8
+// remaster	9
+// expanded_game	10
+// port	11
+// fork	12
+// pack	13
+// update	14
+
+const filters = ["first_release_date != 0", "rating >= 85", "rating_count >= 38", " category = (0,2,4,8,9,10)"]
 
 async function getGamesList() {
   console.log(`\n\n\x1b[36mRequesting games from ${baseUrl}${baseAPI}/games\x1b[0m`)
   try {
-    const response = await IGDBClient.fields(["checksum", "name", "involved_companies", "first_release_date", "hypes", "genres"]) // fetches only the name, movies, and age fields
+    const response = await IGDBClient.fields([
+      "checksum",
+      "name",
+      "first_release_date",
+      "genres",
+      "rating",
+      "rating_count",
+      "category",
+    ]) // fetches only the name, movies, and age fields
 
       .limit(500) // limit to 50 results
       // .offset(2000) // offset results by 10
@@ -15,7 +39,7 @@ async function getGamesList() {
       // .sort("name", "desc") // sorts by name, descending
       // .search("mario") // search for a specific name (search implementations can vary)
 
-      .where(`first_release_date > 0 & hypes > 10 & involved_companies > 0`) // filter the results
+      .where(filters) // filter the results
 
       .request("/games") // execute the query and return a response object
     return response.data

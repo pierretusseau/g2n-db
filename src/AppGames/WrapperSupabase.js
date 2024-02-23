@@ -23,7 +23,7 @@ export async function UpdateAppGameToSupabase(data) {
   return supabaseClient
     .from("app_games")
     .update(data)
-    .match({ checksum: data.checksum })
+    .match({ id: data.id })
     .then(handleSupabaseError)
     .catch((err) => console.log(err))
 }
@@ -32,7 +32,7 @@ export async function DeleteAppGameToSupabase(data) {
   return supabaseClient
     .from("app_games")
     .delete()
-    .match({ checksum: data.checksum })
+    .match({ id: data.id })
     .select()
     .then(handleSupabaseError)
     .catch((err) => console.log(err))

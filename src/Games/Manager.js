@@ -17,7 +17,7 @@ export async function ManageGames(dryRun = false) {
     /*----------------------------------------------------*/
     gamesFromIGDB.map((game) => {
       const alreadyExists = gamesFromSupabase.some((gameCompared) => {
-        return gameCompared.name === game.name
+        return gameCompared.id === game.id
       })
       if (alreadyExists) {
         UpdateGameToSupabase(game)
@@ -30,7 +30,7 @@ export async function ManageGames(dryRun = false) {
     /*----------------------------------------------------*/
     gamesFromSupabase.map((game) => {
       const exists = gamesFromIGDB.some((gameCompared) => {
-        return gameCompared.name === game.name
+        return gameCompared.id === game.id
       })
       if (!exists) {
         DeleteGameToSupabase(game)
