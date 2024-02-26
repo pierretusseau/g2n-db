@@ -1,4 +1,4 @@
-import { objectsComparator, formatDateForSB, consoleLine } from "../utils/Utils.js"
+import { objectsComparator, formatDateForSB, consoleLine, removeDuplicates } from "../utils/Utils.js"
 import { GetGamesFromSupabase } from "../Games/WrapperSupabase.js"
 import { GetGenresFromSupabase } from "../Genres/WrapperSupabase.js"
 import { GetCompaniesFromSupabase } from "../Companies/WrapperSupabase.js"
@@ -20,7 +20,7 @@ const getCuratedListOfGames = async (gamesFromSupabase) => {
     const gamesWithoutPublisher = []
     const gamesWithoutDeveloperOrPublisher = []
 
-    const curatedGamesList = gamesFromSupabase.map((game, index, array) => {
+    const curatedGamesList = removeDuplicates(gamesFromSupabase).map((game, index, array) => {
       // Year
       const date = new Date(game.first_release_date * 1000)
       const release_year = date.getFullYear()
@@ -106,7 +106,8 @@ export async function ManageAppGames(dryRun = false) {
     if (!dryRun) {
       // Update / Create
       /*----------------------------------------------------*/
-      console.log("should have", curatedGamesList.length, "of total games before send to DB wtf bro")
+      console.error("\n----- 🐞 Bug on creation -----")
+      console.error("should have", curatedGamesList.length, "of total games ?")
       curatedGamesList.map((game) => {
         const alreadyExists = appGamesFromSupabase.some((gameCompared) => {
           return gameCompared.id === game.id

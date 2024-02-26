@@ -124,3 +124,30 @@ export const objectsComparator = (comparedObject, objectToCompare) => {
 
   return true
 }
+
+export const removeDuplicates = (array) => {
+  // Use a Set to keep track of unique combinations of "name" and "release_year"
+  const seen = new Set()
+  const duplicates = []
+
+  // Use filter to create a new array with unique elements
+  const filteredItems = array.filter((item) => {
+    const date = new Date(item.first_release_date * 1000)
+    const release_year = date.getFullYear()
+    const key = item.name + release_year
+
+    // If the combination of "name" and "release_year" is not in the Set, add it and return true
+    if (!seen.has(key)) {
+      seen.add(key)
+      return true
+    }
+
+    // If the combination is in the Set, return false to exclude it from the filtered array
+    duplicates.push({ id: item.id, game: `${item.name} (${release_year})` })
+    return false
+  })
+
+  console.log("\x1b[34mGames with duplicates :\x1b[0m", `${duplicates.length}/${array.length}`, duplicates)
+
+  return filteredItems
+}
