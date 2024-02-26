@@ -1,6 +1,7 @@
 import { ManageGames } from "./Games/Manager.js"
 import { ManageGenres } from "./Genres/Manager.js"
 import { ManageCompanies } from "./Companies/Manager.js"
+import { ManagePlatforms } from "./Platforms/Manager.js"
 import { ManageAppGames } from "./AppGames/Manager.js"
 
 import { errorHandler } from "./utils/Utils.js"
@@ -28,6 +29,8 @@ if (manager === "games") {
   runManagerAsync(ManageGenres, "genres")
 } else if (manager === "companies") {
   runManagerAsync(ManageCompanies, "companies")
+} else if (manager === "platforms") {
+  runManagerAsync(ManagePlatforms, "platforms")
 } else if (manager === "app_games") {
   runManagerAsync(ManageAppGames, "app_games")
 } else {
@@ -35,6 +38,7 @@ if (manager === "games") {
     { fn: ManageGames, name: "games" },
     { fn: ManageGenres, name: "genres" },
     { fn: ManageCompanies, name: "companies" },
+    { fn: ManagePlatforms, name: "platforms" },
     { fn: ManageAppGames, name: "app_games" },
   ]
 

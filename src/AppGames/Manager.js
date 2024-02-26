@@ -54,6 +54,10 @@ const getCuratedListOfGames = async (gamesFromSupabase) => {
         gamesWithoutDeveloperOrPublisher.push({ id: game.id, name: game.name })
       }
 
+      if (!game.platforms) {
+        console.log("Doesn' have platform :", game.name)
+      }
+
       return {
         id: game.id,
         checksum: game.checksum,
@@ -67,6 +71,7 @@ const getCuratedListOfGames = async (gamesFromSupabase) => {
         rating: game.rating,
         rating_count: game.rating_count,
         category: game.category,
+        platforms: game.platforms,
       }
     })
 

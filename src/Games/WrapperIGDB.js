@@ -17,7 +17,7 @@ import IGDBClient from "../Common/IGDBClient.js"
 // pack	13
 // update	14
 
-const filters = ["first_release_date != 0", "rating >= 85", "rating_count >= 38", " category = (0,2,4,8,9,10)"]
+const filters = ["first_release_date != 0", "rating >= 85", "rating_count >= 38", "category = (0,2,4,8,9,10)"]
 
 async function getGamesList() {
   console.log(`\n\n\x1b[36mRequesting games from ${baseUrl}${baseAPI}/games\x1b[0m`)
@@ -30,6 +30,7 @@ async function getGamesList() {
       "rating",
       "rating_count",
       "category",
+      "platforms",
     ]) // fetches only the name, movies, and age fields
 
       .limit(500) // limit to 50 results
