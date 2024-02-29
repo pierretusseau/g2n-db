@@ -1,4 +1,4 @@
-import { objectsComparator, formatDateForSB, consoleLine, removeDuplicates } from "../utils/Utils.js"
+import { objectsComparator, formatDateForSB, consoleLine, removeDuplicates, log } from "../utils/Utils.js"
 import { GetGamesFromSupabase } from "../Games/WrapperSupabase.js"
 import { GetGenresFromSupabase } from "../Genres/WrapperSupabase.js"
 import { GetCompaniesFromSupabase } from "../Companies/WrapperSupabase.js"
@@ -9,6 +9,10 @@ import {
   DeleteAppGameToSupabase,
 } from "./WrapperSupabase.js"
 
+const publisherExcludeList = [
+  812, // Gradiente: Brazilian publisher of Nintedo games
+]
+
 const getCuratedListOfGames = async (gamesFromSupabase) => {
   try {
     console.log(`\n\n\x1b[36mBuilding curated list of games\x1b[0m`)
@@ -18,16 +22,17 @@ const getCuratedListOfGames = async (gamesFromSupabase) => {
     const companiesFromSupabase = await GetCompaniesFromSupabase()
     const gamesWithoutDeveloper = []
     const gamesWithoutPublisher = []
+    const gamesWithMultiplePublishers = []
     const gamesWithoutDeveloperOrPublisher = []
 
-    const curatedGamesList = removeDuplicates(gamesFromSupabase).map((game, index, array) => {
+    const curatedGamesList = gamesFromSupabase.map((game, index, array) => {
       // Year
       const date = new Date(game.first_release_date * 1000)
       const release_year = date.getFullYear()
 
       // Genres
       const genres = game.genres.map((ggenre) => {
-        return genresFromSupabase.find((genre) => genre.id === ggenre).name
+        return genresFromSupabase.find((genre) => genre.id === ggenre)
       })
 
       // Developer
@@ -41,16 +46,42 @@ const getCuratedListOfGames = async (gamesFromSupabase) => {
       }
 
       // Publisher
-      const publisher = companiesFromSupabase
+      const publishers = companiesFromSupabase
         .filter((company) => company.published)
-        .find((company) => {
+        .filter((company) => !publisherExcludeList.includes(company.id))
+        .filter((company) => {
           return company.published.some((c) => c === game.id)
         })
-      if (!publisher) {
+      if (publishers.length > 1) {
+        // console.log(
+        //   game.name,
+        //   "has multiple publishing companies :",
+        //   publishers.map((p) => {
+        //     return {
+        //       id: p.id,
+        //       name: p.name,
+        //     }
+        //   })
+        // )
+        gamesWithMultiplePublishers.push(game)
+      }
+      if (publishers.length === 0) {
         gamesWithoutPublisher.push({ id: game.id, name: game.name })
       }
+      // const publisher = companiesFromSupabase
+      //   .filter((company) => company.published)
+      //   .find((company) => {
+      //     return company.published.some((c) => c === game.id)
+      //   })
+      // if (!publisher) {
+      //   gamesWithoutPublisher.push({ id: game.id, name: game.name })
+      // }
 
-      if (!publisher && !developer) {
+      // if (!publisher && !developer) {
+      //   gamesWithoutDeveloperOrPublisher.push({ id: game.id, name: game.name })
+      // }
+
+      if (publishers.length === 0 && !developer) {
         gamesWithoutDeveloperOrPublisher.push({ id: game.id, name: game.name })
       }
 
@@ -63,11 +94,14 @@ const getCuratedListOfGames = async (gamesFromSupabase) => {
         checksum: game.checksum,
         name: game.name,
         release_year: release_year,
-        genres: genres,
-        developer: developer?.id || publisher?.id,
+        genres: genres.map((g) => g.id),
+        // developer: developer?.id || publisher?.id,
+        developer: developer?.id || publishers[0]?.id,
         unsure_developer: !developer,
-        publisher: publisher?.id || developer?.id,
-        unsure_publisher: !publisher,
+        // publisher: publisher?.id || developer?.id,
+        publishers: publishers?.length === 0 ? developer?.id : publishers.map((p) => p.id),
+        // unsure_publisher: !publisher,
+        unsure_publisher: publishers?.length === 0,
         rating: game.rating,
         rating_count: game.rating_count,
         category: game.category,
@@ -90,6 +124,13 @@ const getCuratedListOfGames = async (gamesFromSupabase) => {
       gamesWithoutDeveloperOrPublisher.length ? `${gamesWithoutDeveloperOrPublisher.length}/${gamesFromSupabase.length}` : "",
       gamesWithoutDeveloperOrPublisher.length ? gamesWithoutDeveloperOrPublisher : "None"
     )
+    console.log(
+      "\x1b[34mGames with multiple publishers :\x1b[0m",
+      `${gamesWithMultiplePublishers.length}`
+      // gamesWithMultiplePublishers
+    )
+
+    log(gamesWithMultiplePublishers, "logs/gamesWithMulplePublishers.json")
 
     console.log(`\n${curatedGamesList.length} \x1b[32mgames curated\x1b[0m`)
 
